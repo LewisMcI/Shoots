@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
     public TextMeshProUGUI joinInput;
-
     public void CreateRoom()
     {         
         // Generate roomCode

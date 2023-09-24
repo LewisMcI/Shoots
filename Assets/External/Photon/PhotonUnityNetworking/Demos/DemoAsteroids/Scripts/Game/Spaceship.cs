@@ -167,7 +167,7 @@ namespace Photon.Pun.Demo.Asteroids
 
             /** Use this if you want to fire one bullet at a time **/
             bullet = Instantiate(BulletPrefab, position, Quaternion.identity) as GameObject;
-            bullet.GetComponent<Bullet>().InitializeBullet(photonView.Owner, (rotation * Vector3.forward), Mathf.Abs(lag));
+            //bullet.GetComponent<Bullet>().InitializeBullet(photonView.Owner, (rotation * Vector3.forward), Mathf.Abs(lag));
 
 
             /** Use this if you want to fire two bullets at once **/

@@ -69,8 +69,8 @@ namespace Photon.Pun.Demo.Asteroids
             {
                 if (photonView.IsMine)
                 {
-                    Bullet bullet = collision.gameObject.GetComponent<Bullet>();
-                    bullet.Owner.AddScore(isLargeAsteroid ? 2 : 1);
+                    //Bullet bullet = collision.gameObject.GetComponent<Bullet>();
+                    //bullet.Owner.AddScore(isLargeAsteroid ? 2 : 1);
 
                     DestroyAsteroidGlobally();
                 }
