@@ -9,6 +9,7 @@ Network-Game-Programming/[Bb]uild/
 Network-Game-Programming/[Bb]uilds/
 Network-Game-Programming/[Ll]ogs/
 Network-Game-Programming/[Uu]ser[Ss]ettings/
+Network-Game-Programming/TempBuild/
 
 In Class/[Ll]ibrary/
 In Class/[Tt]emp/
@@ -17,6 +18,7 @@ In Class/[Bb]uild/
 In Class/[Bb]uilds/
 In Class/[Ll]ogs/
 In Class/[Uu]ser[Ss]ettings/
+TempBuild/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
