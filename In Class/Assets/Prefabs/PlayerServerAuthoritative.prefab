@@ -175,6 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80e86d974f1bff54b800681858336bd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnObjectTransform: {fileID: 6791022407936720624, guid: 5ccc03bad58aba24791d14b741f36724, type: 3}
   speed: 5
 --- !u!114 &7686586156881219644
 MonoBehaviour:

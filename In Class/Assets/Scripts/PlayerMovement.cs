@@ -5,6 +5,8 @@ using Unity.Netcode;
 
 public class PlayerMovement : NetworkBehaviour
 {
+    [SerializeField] private Transform spawnObjectTransform; 
+    Transform spawnedObjectTransform;
     public float speed = 5f;
 
     private Animator movementAnimator;
@@ -19,16 +21,20 @@ public class PlayerMovement : NetworkBehaviour
         if (!IsOwner)
             return;
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            createBulletShotFromClientServerRpc(transform.position.x, transform.position.y, transform.position.z, transform.rotation);
+        }
         movementAnimator.SetBool("isMoving", false);
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.D))
         {
             transform.position += new Vector3(speed * Time.deltaTime, 0f, 0f);
             movementAnimator.SetBool("isMoving", true);
             HandleMovementServerRpc(1, this.NetworkObjectId);
         }
 
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (Input.GetKey(KeyCode.A))
         {
             transform.position -= new Vector3(speed * Time.deltaTime, 0f, 0f);
             movementAnimator.SetBool("isMoving", true);
@@ -36,14 +42,14 @@ public class PlayerMovement : NetworkBehaviour
 
         }
 
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
         {
             transform.position += new Vector3(0f, speed * Time.deltaTime, 0f);
             movementAnimator.SetBool("isJump", true);
             HandleMovementServerRpc(3, this.NetworkObjectId);
         }
 
-        if (Input.GetKey(KeyCode.DownArrow))
+        if (Input.GetKey(KeyCode.S))
         {
             transform.position -= new Vector3(0f, speed * Time.deltaTime, 0f);
             movementAnimator.SetBool("isCrouch", true);
@@ -51,6 +57,13 @@ public class PlayerMovement : NetworkBehaviour
         }
         else
             movementAnimator.SetBool("isCrouch", false);
+
+    }
+    [ServerRpc]
+    private void createBulletShotFromClientServerRpc(float positionx, float positiony, float positionz, Quaternion vector3rotation)
+    {
+        spawnedObjectTransform = Instantiate(spawnObjectTransform, new Vector3(positionx, positiony, positionz), vector3rotation);
+        spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
     }
 
     [ServerRpc]
