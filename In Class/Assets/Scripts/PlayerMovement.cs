@@ -10,7 +10,9 @@ public class PlayerMovement : NetworkBehaviour
     public float speed = 5f;
 
     private Animator movementAnimator;
-
+    private NetworkVariable<int> theScoreForEachPlayer = 
+        new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private GameObject[] thePlayers;
     public override void OnNetworkSpawn()
     {
         movementAnimator = this.GetComponent<Animator>();
@@ -95,11 +97,33 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
+    void OnGUI()
+    {
+        thePlayers = GameObject.FindGameObjectsWithTag("Player");
+        int x = 0;
+
+        for (int i = 0; i < thePlayers.Length; i++)
+        {
+            GUI.Label(new Rect(10, 60 + (15 * x), 300, 20), "Player " +
+                (i + 1) + "'s Score: " +
+                thePlayers[i].GetComponent<PlayerMovement>().theScoreForEachPlayer.Value);
+            x++;
+        }
+    }
+
+
     void OnCollisionEnter2D(Collision2D target)
     {
         if (target.gameObject.layer.Equals(LayerMask.NameToLayer("Grounds")) == true)
         {
             movementAnimator.SetBool("isJump", false);
+        }
+
+        if (target.gameObject.tag.Equals("Mushrooms") == true)
+        {
+            if (!IsOwner) return;
+            theScoreForEachPlayer.Value = theScoreForEachPlayer.Value + 1;
+            Destroy(target.gameObject);
         }
     }
 

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - MovingPlatforms
+  - Mushrooms
   layers:
   - Default
   - TransparentFX
@@ -12,7 +13,7 @@ TagManager:
   - Grounds
   - Water
   - UI
-  - 
+  - Foreground
   - 
   - 
   - 
