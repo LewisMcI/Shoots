@@ -27,19 +27,19 @@ public class PlayerMovement : NetworkBehaviour
         {
             createBulletShotFromClientServerRpc(transform.position.x, transform.position.y, transform.position.z, transform.rotation);
         }
-        movementAnimator.SetBool("isMoving", false);
+        movementAnimator.SetBool("isMove", false);
 
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += new Vector3(speed * Time.deltaTime, 0f, 0f);
-            movementAnimator.SetBool("isMoving", true);
+            movementAnimator.SetBool("isMove", true);
             HandleMovementServerRpc(1, this.NetworkObjectId);
         }
 
         if (Input.GetKey(KeyCode.A))
         {
             transform.position -= new Vector3(speed * Time.deltaTime, 0f, 0f);
-            movementAnimator.SetBool("isMoving", true);
+            movementAnimator.SetBool("isMove", true);
             HandleMovementServerRpc(2, this.NetworkObjectId);
 
         }
