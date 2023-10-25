@@ -32,6 +32,7 @@ public class PlayerMovement : NetworkBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += new Vector3(speed * Time.deltaTime, 0f, 0f);
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             movementAnimator.SetBool("isMove", true);
             HandleMovementServerRpc(1, this.NetworkObjectId);
         }
@@ -39,6 +40,7 @@ public class PlayerMovement : NetworkBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             transform.position -= new Vector3(speed * Time.deltaTime, 0f, 0f);
+            transform.rotation = Quaternion.Euler(0f, -180f, 0f);
             movementAnimator.SetBool("isMove", true);
             HandleMovementServerRpc(2, this.NetworkObjectId);
 
@@ -46,7 +48,7 @@ public class PlayerMovement : NetworkBehaviour
 
         if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
         {
-            transform.position += new Vector3(0f, speed * Time.deltaTime, 0f);
+            transform.position += new Vector3(0f, speed * .5f * Time.deltaTime, 0f);
             movementAnimator.SetBool("isJump", true);
             HandleMovementServerRpc(3, this.NetworkObjectId);
         }
@@ -87,7 +89,7 @@ public class PlayerMovement : NetworkBehaviour
                 transform.position -= new Vector3(speed * Time.deltaTime, 0f, 0f);
                 break;
             case 3:
-                transform.position += new Vector3(0f, speed * Time.deltaTime, 0f);
+                transform.position += new Vector3(0f, speed * .5f * Time.deltaTime, 0f);
                 movementAnimator.SetBool("isJump", true);
                 break;
             case 4:
