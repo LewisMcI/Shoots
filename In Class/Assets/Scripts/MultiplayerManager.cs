@@ -1,10 +1,17 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Networking.Transport;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MultiPlayerManager : NetworkBehaviour
 {
+    public GameObject playerCard;
+    public RectTransform centerRect;
+    private float spacing = 2f;
+
+    private List<GameObject> playerCards = new List<GameObject>();
     public enum ButtonType
     {
         Host,
@@ -26,6 +33,7 @@ public class MultiPlayerManager : NetworkBehaviour
             {
                 case ButtonType.Host:
                     NetworkManager.Singleton.StartHost();
+                    AddPlayer();
                     break;
                 case ButtonType.Client:
                     NetworkManager.Singleton.StartClient();
@@ -48,11 +56,50 @@ public class MultiPlayerManager : NetworkBehaviour
             StatusLabels();
         }
     }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+            AddPlayer();
+    }
+    void AddPlayer()
+    {
+        Debug.Log("Add New Player");
+        // Create new Player Card
+        GameObject newPlayerCard = (GameObject)Instantiate(playerCard, Vector3.zero, Quaternion.identity);
+        playerCards.Add(newPlayerCard);
+        // Position
+        PositionPlayerCards();
+    }
 
+    private void PositionPlayerCards()
+    {
+        if (playerCards.Count == 0)
+            return;
+        Vector3 centerPosition = centerRect.position;
+        float totalWidth = 0f;
+        float halfTotalWidth = 0f;
+        int playerCount = playerCards.Count;
+
+        for (int i = 1; i < playerCount; i++)
+        {
+            totalWidth += playerCards[i].GetComponent<RectTransform>().rect.width / 100;
+        }
+
+        halfTotalWidth = (totalWidth + (spacing * (playerCount - 1))) / 2;
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            float xOffset = (i * (playerCards[i].GetComponent<RectTransform>().rect.width / 100 + spacing)) - halfTotalWidth;
+            Vector3 cardPosition = new Vector3(centerPosition.x + xOffset, centerPosition.y, centerPosition.z);
+            playerCards[i].GetComponent<RectTransform>().position = cardPosition;
+        }
+    }
     private void Connected(ulong clientId)
     {
         Debug.Log("Connected To Server");
-        NetworkManager.SceneManager.LoadScene("Lobby Screen", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        //NetworkManager.SceneManager.LoadScene("Lobby Screen", UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+        //GameObject player = (GameObject)Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
     }
 
     static void StatusLabels()
