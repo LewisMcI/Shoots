@@ -12,16 +12,20 @@ public class MultiPlayerManager : NetworkBehaviour
     private float spacing = 2f;
 
     private List<GameObject> playerCards = new List<GameObject>();
+
+    public NetworkObject playerNetworkObject;
     public enum ButtonType
     {
         Host,
         Client,
         Server,
         Quit
-    } 
+    }
     public void ButtonPress(int intButtonType)
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += Connected;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnPlayerJoined;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnPlayerLeave;
+
         ButtonType buttonType;
         if (intButtonType < Enum.GetNames(typeof(ButtonType)).Length)
             buttonType = (ButtonType)intButtonType;
@@ -32,8 +36,7 @@ public class MultiPlayerManager : NetworkBehaviour
             switch (buttonType)
             {
                 case ButtonType.Host:
-                    NetworkManager.Singleton.StartHost();
-                    AddPlayer();
+                    NetworkManager.Singleton.StartHost();   
                     break;
                 case ButtonType.Client:
                     NetworkManager.Singleton.StartClient();
@@ -56,23 +59,41 @@ public class MultiPlayerManager : NetworkBehaviour
             StatusLabels();
         }
     }
-    private void Update()
+    bool done = false;
+    private void OnPlayerJoined(ulong clientId)
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
-            AddPlayer();
+        Debug.Log("Player Joined");
+        playerNetworkObject.Spawn();
+        if (done)
+            return;
+        done = true;
+        Debug.Log(Player.Instance.playerName + " is owner: " + IsOwner);
+        ReorganiseClientsServerRpc(clientId);
     }
-    void AddPlayer()
+    private void OnPlayerLeave(ulong clientId)
     {
-        Debug.Log("Add New Player");
-        // Create new Player Card
-        GameObject newPlayerCard = (GameObject)Instantiate(playerCard, Vector3.zero, Quaternion.identity);
-        playerCards.Add(newPlayerCard);
-        // Position
-        PositionPlayerCards();
+        Debug.Log("Player Leave");
     }
 
+    [ServerRpc(RequireOwnership=false)]
+    private void ReorganiseClientsServerRpc(ulong clientId)
+    {
+        // Add new player
+        NetworkObject playerCardNetworkObject = Player.Instance.CreatePlayerCard().GetComponent<NetworkObject>();
+        playerCardNetworkObject.SpawnAsPlayerObject(clientId, true);
+
+        ReorganiseClientRpc();
+    }
+    [ClientRpc]
+    void ReorganiseClientRpc()
+    {
+        // Reposition
+        PositionPlayerCards();
+    }
     private void PositionPlayerCards()
     {
+        playerCards = new List<GameObject>(GameObject.FindGameObjectsWithTag("Player Cards"));
+
         if (playerCards.Count == 0)
             return;
         Vector3 centerPosition = centerRect.position;
@@ -94,14 +115,6 @@ public class MultiPlayerManager : NetworkBehaviour
             playerCards[i].GetComponent<RectTransform>().position = cardPosition;
         }
     }
-    private void Connected(ulong clientId)
-    {
-        Debug.Log("Connected To Server");
-        //NetworkManager.SceneManager.LoadScene("Lobby Screen", UnityEngine.SceneManagement.LoadSceneMode.Single);
-
-        //GameObject player = (GameObject)Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-    }
-
     static void StatusLabels()
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 300));

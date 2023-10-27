@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MovingPlatforms
   - Mushrooms
+  - Player Cards
   layers:
   - Default
   - TransparentFX
