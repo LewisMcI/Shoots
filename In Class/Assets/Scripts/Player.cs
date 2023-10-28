@@ -31,8 +31,6 @@ public class Player : NetworkBehaviour
 
     private void Start()
     {
-        if (!IsOwner)
-            return;
         if (Instance == null)
             Instance = this;
         else
@@ -55,9 +53,11 @@ public class Player : NetworkBehaviour
         return name;
     }
 
-    public GameObject CreatePlayerCard()
+    public GameObject CreatePlayerCard(string playerName)
     {
+        Debug.Log("Instantiating Player Card with Name: " + playerName);
         playerCard = Instantiate(defaultPlayerCard);
+        playerCard.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = playerName;
         return playerCard;
     }
 

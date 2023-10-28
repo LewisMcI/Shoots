@@ -9719,7 +9719,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39f5cd5c77d9ccf42b83eb7d57623d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCard: {fileID: 3489930813234393811, guid: e5fe4fe76d8833e41bbbc0b508728068, type: 3}
   centerRect: {fileID: 1741276724}
 --- !u!4 &1461207256
 Transform:
