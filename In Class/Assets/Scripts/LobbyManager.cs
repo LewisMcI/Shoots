@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using Unity.Netcode;
 using Unity.Networking.Transport;
 using UnityEngine;
@@ -7,6 +9,11 @@ using UnityEngine.SceneManagement;
 
 public class LobbyManager : NetworkBehaviour
 {
+    // Local Dictionary associating ClientID's and Player Data
+    Dictionary<ulong, PlayerData> playerDictionary = new Dictionary<ulong, PlayerData>();
+
+    // Server Dictionary associating ClientID's and Serialized Player Data
+    Dictionary<ulong, string> serverDictionary = new Dictionary<ulong, string>();
     public enum ButtonType
     {
         Host,
@@ -49,75 +56,133 @@ public class LobbyManager : NetworkBehaviour
         }
     }
 
-    private List<ulong> connectedClientIds = new List<ulong>();
-    ulong localClientId = 9999;
+    ulong localClientId = ulong.MaxValue;
     /* OnPlayerJoined
      * Called within the connected client and the server
      */
     private void OnPlayerJoined(ulong clientId)
     {
-        
-        if (localClientId == 9999)
+        // Sent ClientID for Client and Server
+        if (localClientId == ulong.MaxValue)
             localClientId = NetworkManager.Singleton.LocalClientId;
-        connectedClientIds.Add(clientId);
-        // Is Owner of Player
+
+        // Is Client
         if ((IsServer && clientId == localClientId) || (!IsServer && IsClient))
         {
-            Debug.Log("Player: " + clientId + " has Joined");
-            string playerName = Player.Instance.playerName;
-            Debug.Log("New Player Name: " + playerName);
-            BroadcastPlayerJoinServerRpc(clientId, playerName);
+            string playerDataJson = Player.Instance.SerializePlayerData();
+            BroadcastPlayerJoinServerRpc(clientId, playerDataJson);
         }
         // Is Server
+        else;
+    }
+
+    [ServerRpc(RequireOwnership=false)]
+    private void BroadcastPlayerJoinServerRpc(ulong newClientId, string playerDataJson)
+    {
+        Debug.Log("Server: Added new player");
+        serverDictionary.Add(newClientId, playerDataJson);
+
+        // Pass through dictionary values to player.
+        string[] players = new string[serverDictionary.Count];
+        ulong[] clientIds = new ulong[serverDictionary.Count];
+        int i = 0;
+        foreach (var kvp in serverDictionary)
+        {
+            players[i] = kvp.Value;
+            clientIds[i] = kvp.Key;
+            i++;
+        }
+        BroadcastPlayerJoinClientRpc(newClientId, playerDataJson, SerializeStringArray(players), SerializeUlongArray(clientIds));
+    }
+    string SerializeStringArray(string[] stringArray)
+    {
+        return JsonSerializer.SerializeJsonArray(stringArray);
+    }
+    string[] DeserializeStringArray(string serializedArray)
+    {
+        return JsonSerializer.DeserializeJsonArray(serializedArray);
+    }
+    string SerializeUlongArray(ulong[] ulongArray)
+    {
+        string serializedArray = string.Join(",", ulongArray);
+        return serializedArray;
+    }
+    ulong[] DeserializeUlongArray(string serializedArray)
+    {
+        string[] stringValues = serializedArray.Split(',');
+        ulong[] ulongArray = new ulong[stringValues.Length];
+
+        for (int i = 0; i < stringValues.Length; i++)
+        {
+            if (ulong.TryParse(stringValues[i], out ulong value))
+            {
+                ulongArray[i] = value;
+            }
+            else
+            {
+                // Handle parsing errors as needed (e.g., throw an exception or use a default value).
+                // Here, we set the element to 0 for simplicity.
+                ulongArray[i] = 0;
+            }
+        }
+
+        return ulongArray;
+
+    }
+    [ClientRpc]
+    private void BroadcastPlayerJoinClientRpc(ulong newClientId, string newPlayerDataJson, string serializedPlayerList, string serializedClientIdList)
+    {
+        // Player
+        if (localClientId == newClientId)
+        {
+            string[] existingPlayersStringArray = DeserializeStringArray(serializedPlayerList);
+            ulong[] existingPlayersClientIdArray = DeserializeUlongArray(serializedClientIdList);
+            for (int i = 0; i < existingPlayersStringArray.Length; i++)
+            {
+                string existingPlayerDataString = existingPlayersStringArray[i];
+                ulong existingPlayerClientId = existingPlayersClientIdArray[i];
+
+                PlayerData existingPlayer = Player.Instance.DeserializePlayerData(existingPlayerDataString);
+                if (existingPlayerClientId == localClientId)
+                    Debug.Log("Local: Current Player " + existingPlayerClientId + ", with Name: " + existingPlayer.playerName + " has been Added");
+                else
+                    Debug.Log("Local: Existing Player " + existingPlayerClientId + ", with Name: " + existingPlayer.playerName + " has been Added");
+
+
+                AddPlayerCard(existingPlayerClientId, existingPlayerDataString);
+            }
+        }
+        // Other
         else
         {
-            Debug.Log("Server: New Client has Joined");
+            PlayerData newPlayerData = Player.Instance.DeserializePlayerData(newPlayerDataJson);
+            Debug.Log("Local: New Player " + newClientId + ", with Name: " + newPlayerData.playerName + " has Joined");
+            AddPlayerCard(newClientId, newPlayerDataJson);
         }
     }
-    void AddPlayerCard(string playerName)
+
+    public RectTransform centerRect;
+    private float spacing = 2f;
+    public List<GameObject> OrderGameObjectsByName(GameObject[] gameObjects)
     {
-        Player.Instance.CreatePlayerCard(playerName);
+        var orderedList = gameObjects
+             .OrderBy(obj =>
+                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text)
+             .ToList();
+
+        return orderedList;
+    }
+    void AddPlayerCard(ulong clientId, string playerDataJson)
+    {
+        PlayerData playerData = Player.Instance.DeserializePlayerData(playerDataJson);
+        playerDictionary.Add(clientId, playerData);
+        Player.Instance.CreatePlayerCard(playerData);
         PositionPlayerCards();
     }
 
-    [ServerRpc(RequireOwnership=false)]
-    private void BroadcastPlayerJoinServerRpc(ulong newClientId, string playerName)
-    {
-        BroadcastPlayerJoinClientRpc(newClientId, playerName);
-    }
-    [ClientRpc]
-    private void BroadcastPlayerJoinClientRpc(ulong newClientId, string playerName)
-    {
-        Debug.Log("Broadcasting Player Join with Name: " + playerName);
-        AddPlayerCard(playerName);
-
-        // Everyone BUT the new player
-        if (localClientId != newClientId)
-        {
-            Debug.Log("Broadcast: Player: " + newClientId + " has Joined");
-            string targetPlayerName = Player.Instance.playerName;
-            SendLateJoinerClientIDServerRpc(newClientId, localClientId, targetPlayerName);
-        }
-    }
-    [ServerRpc(RequireOwnership=false)]
-    private void SendLateJoinerClientIDServerRpc(ulong lateJoinerClientId, ulong existingClientId, string playerName)
-    {
-        SendLateJoinerClientIDClientRpc(lateJoinerClientId, existingClientId, playerName);
-    }
-    [ClientRpc]
-    private void SendLateJoinerClientIDClientRpc(ulong lateJoinerClientId, ulong existingClientId, string playerName)
-    {
-        if (localClientId == lateJoinerClientId)
-        {
-            AddPlayerCard(playerName);
-            Debug.Log("Added Player: " + existingClientId + " to late joiner");
-        }
-    }
-    public RectTransform centerRect;
-    private float spacing = 2f;
     private void PositionPlayerCards()
     {
-        List<GameObject> playerCards = new List<GameObject>(GameObject.FindGameObjectsWithTag("Player Cards"));
+        List<GameObject> playerCards = OrderGameObjectsByName(GameObject.FindGameObjectsWithTag("Player Cards"));
         if (playerCards.Count == 0)
             return;
         Vector3 centerPosition = centerRect.position;
@@ -136,6 +201,7 @@ public class LobbyManager : NetworkBehaviour
             playerCards[i].GetComponent<RectTransform>().position = cardPosition;
         }
     }
+
     /* OnPlayerLeft
      * Called within the connected client and the server
      */
@@ -144,16 +210,23 @@ public class LobbyManager : NetworkBehaviour
         // Is Owner of Player
         if ((IsServer && clientId == localClientId) || (!IsServer && IsClient))
             Debug.Log("Player has Left"); // Player will leave if server shuts down
-        connectedClientIds.Remove(clientId);
-        BroadcastPlayerLeftClientRpc(clientId);
+        serverDictionary.Remove(clientId);
+        BroadcastPlayerLeftServerRpc(clientId);
     }
-
-    [ClientRpc]
-    private void BroadcastPlayerLeftClientRpc(ulong newClientId)
+    [ServerRpc]
+    private void BroadcastPlayerLeftServerRpc(ulong oldClientId)
     {
-        if (localClientId != newClientId)
+        Debug.Log("Server: Removed player");
+        serverDictionary.Remove(oldClientId);
+        BroadcastPlayerLeftClientRpc(oldClientId);
+    }
+    [ClientRpc]
+    private void BroadcastPlayerLeftClientRpc(ulong oldClientId)
+    {
+        if (localClientId != oldClientId)
         {
-            Debug.Log("Broadcast: Player: " + newClientId + " has Left");
+            Debug.Log("Local: Player: " + oldClientId + " has Left");
+            playerDictionary.Remove(oldClientId);
         }
     }
 }
