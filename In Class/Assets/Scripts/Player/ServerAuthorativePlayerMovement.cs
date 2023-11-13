@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
-public class PlayerMovement : NetworkBehaviour
+public class ServerAuthorativePlayerMovement : NetworkBehaviour
 {
     [SerializeField] private Transform spawnObjectTransform; 
     Transform spawnedObjectTransform;
     public float speed = 5f;
 
+    [SerializeField]
     private Animator movementAnimator;
     private NetworkVariable<int> theScoreForEachPlayer = 
         new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private GameObject[] thePlayers;
-    public override void OnNetworkSpawn()
-    {
-        movementAnimator = this.GetComponent<Animator>();
-    }
 
     void FixedUpdate()
     {
@@ -108,7 +105,7 @@ public class PlayerMovement : NetworkBehaviour
         {
             GUI.Label(new Rect(10, 60 + (15 * x), 300, 20), "Player " +
                 (i + 1) + "'s Score: " +
-                thePlayers[i].GetComponent<PlayerMovement>().theScoreForEachPlayer.Value);
+                thePlayers[i].GetComponent<ServerAuthorativePlayerMovement>().theScoreForEachPlayer.Value);
             x++;
         }
     }

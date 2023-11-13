@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Character
   m_EditorClassIdentifier: Assembly-CSharp::SpritesDataObject
   sprites:
-  - {fileID: 21300000, guid: a27ec283d06258444ad454a37f743184, type: 3}
   - {fileID: 21300000, guid: 5fde7e281b84fc243a120116a0e8863c, type: 3}
+  - {fileID: 21300000, guid: a27ec283d06258444ad454a37f743184, type: 3}
   - {fileID: 21300000, guid: 798bb68968109034f8fb9eb76bbe409a, type: 3}

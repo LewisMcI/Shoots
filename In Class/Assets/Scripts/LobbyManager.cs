@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -9,11 +10,19 @@ using UnityEngine.SceneManagement;
 
 public class LobbyManager : NetworkBehaviour
 {
+    // Local Dictionary associating ClientID's and Player Cards
+    Dictionary<ulong, GameObject> playerCardDictionary = new Dictionary<ulong, GameObject>();
+
     // Local Dictionary associating ClientID's and Player Data
     Dictionary<ulong, PlayerData> playerDictionary = new Dictionary<ulong, PlayerData>();
 
     // Server Dictionary associating ClientID's and Serialized Player Data
     Dictionary<ulong, string> serverDictionary = new Dictionary<ulong, string>();
+
+    // Server Dictionary associating ClientID's and Serialized Ready Up Status
+    Dictionary<ulong, bool> serverReadyUpDictionary = new Dictionary<ulong, bool>();
+
+
     public enum ButtonType
     {
         Host,
@@ -81,6 +90,7 @@ public class LobbyManager : NetworkBehaviour
     {
         Debug.Log("Server: Added new player");
         serverDictionary.Add(newClientId, playerDataJson);
+        serverReadyUpDictionary.Add(newClientId, false);
 
         // Pass through dictionary values to player.
         string[] players = new string[serverDictionary.Count];
@@ -92,42 +102,7 @@ public class LobbyManager : NetworkBehaviour
             clientIds[i] = kvp.Key;
             i++;
         }
-        BroadcastPlayerJoinClientRpc(newClientId, playerDataJson, SerializeStringArray(players), SerializeUlongArray(clientIds));
-    }
-    string SerializeStringArray(string[] stringArray)
-    {
-        return JsonSerializer.SerializeJsonArray(stringArray);
-    }
-    string[] DeserializeStringArray(string serializedArray)
-    {
-        return JsonSerializer.DeserializeJsonArray(serializedArray);
-    }
-    string SerializeUlongArray(ulong[] ulongArray)
-    {
-        string serializedArray = string.Join(",", ulongArray);
-        return serializedArray;
-    }
-    ulong[] DeserializeUlongArray(string serializedArray)
-    {
-        string[] stringValues = serializedArray.Split(',');
-        ulong[] ulongArray = new ulong[stringValues.Length];
-
-        for (int i = 0; i < stringValues.Length; i++)
-        {
-            if (ulong.TryParse(stringValues[i], out ulong value))
-            {
-                ulongArray[i] = value;
-            }
-            else
-            {
-                // Handle parsing errors as needed (e.g., throw an exception or use a default value).
-                // Here, we set the element to 0 for simplicity.
-                ulongArray[i] = 0;
-            }
-        }
-
-        return ulongArray;
-
+        BroadcastPlayerJoinClientRpc(newClientId, playerDataJson, JsonSerializer.SerializeJsonArray(players), JsonSerializer.SerializeUlongArray(clientIds));
     }
     [ClientRpc]
     private void BroadcastPlayerJoinClientRpc(ulong newClientId, string newPlayerDataJson, string serializedPlayerList, string serializedClientIdList)
@@ -135,8 +110,8 @@ public class LobbyManager : NetworkBehaviour
         // Player
         if (localClientId == newClientId)
         {
-            string[] existingPlayersStringArray = DeserializeStringArray(serializedPlayerList);
-            ulong[] existingPlayersClientIdArray = DeserializeUlongArray(serializedClientIdList);
+            string[] existingPlayersStringArray = JsonSerializer.DeserializeJsonArray(serializedPlayerList);
+            ulong[] existingPlayersClientIdArray = JsonSerializer.DeserializeUlongArray(serializedClientIdList);
             for (int i = 0; i < existingPlayersStringArray.Length; i++)
             {
                 string existingPlayerDataString = existingPlayersStringArray[i];
@@ -163,42 +138,42 @@ public class LobbyManager : NetworkBehaviour
 
     public RectTransform centerRect;
     private float spacing = 2f;
-    public List<GameObject> OrderGameObjectsByName(GameObject[] gameObjects)
-    {
-        var orderedList = gameObjects
-             .OrderBy(obj =>
-                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text)
-             .ToList();
 
-        return orderedList;
-    }
     void AddPlayerCard(ulong clientId, string playerDataJson)
     {
         PlayerData playerData = Player.Instance.DeserializePlayerData(playerDataJson);
         playerDictionary.Add(clientId, playerData);
-        Player.Instance.CreatePlayerCard(playerData);
+        GameObject newPlayerCard = Player.Instance.CreatePlayerCard(playerData);
+        playerCardDictionary.Add(clientId, newPlayerCard);
         PositionPlayerCards();
     }
 
     private void PositionPlayerCards()
     {
-        List<GameObject> playerCards = OrderGameObjectsByName(GameObject.FindGameObjectsWithTag("Player Cards"));
-        if (playerCards.Count == 0)
-            return;
+        int playerCount = playerCardDictionary.Count - 1;
+
         Vector3 centerPosition = centerRect.position;
+        if (playerCount == 0)
+        {
+            playerCardDictionary.Values.First().GetComponent<RectTransform>().position = centerPosition;
+            return;
+        }
         float totalWidth = 0f;
         float halfTotalWidth = 0f;
-        int playerCount = playerCards.Count;
-        for (int i = 1; i < playerCount; i++)
+        foreach (var kvp in playerCardDictionary)
         {
-            totalWidth += playerCards[i].GetComponent<RectTransform>().rect.width / 100;
+            totalWidth += kvp.Value.GetComponent<RectTransform>().rect.width / 100;
         }
+
         halfTotalWidth = (totalWidth + (spacing * (playerCount - 1))) / 2;
-        for (int i = 0; i < playerCount; i++)
+
+        int i = 0;
+        foreach (var kvp in playerCardDictionary)
         {
-            float xOffset = (i * (playerCards[i].GetComponent<RectTransform>().rect.width / 100 + spacing)) - halfTotalWidth;
+            float xOffset = (i * (kvp.Value.GetComponent<RectTransform>().rect.width / 100 + spacing)) - halfTotalWidth;
             Vector3 cardPosition = new Vector3(centerPosition.x + xOffset, centerPosition.y, centerPosition.z);
-            playerCards[i].GetComponent<RectTransform>().position = cardPosition;
+            kvp.Value.GetComponent<RectTransform>().position = cardPosition;
+            i++;
         }
     }
 
@@ -218,6 +193,8 @@ public class LobbyManager : NetworkBehaviour
     {
         Debug.Log("Server: Removed player");
         serverDictionary.Remove(oldClientId);
+        serverReadyUpDictionary.Remove(oldClientId);
+
         BroadcastPlayerLeftClientRpc(oldClientId);
     }
     [ClientRpc]
@@ -226,7 +203,61 @@ public class LobbyManager : NetworkBehaviour
         if (localClientId != oldClientId)
         {
             Debug.Log("Local: Player: " + oldClientId + " has Left");
-            playerDictionary.Remove(oldClientId);
+            RemovePlayer(oldClientId);
         }
+    }
+
+    void RemovePlayer(ulong clientId)
+    {
+        GameObject oldCard = playerCardDictionary[clientId];
+        playerCardDictionary.Remove(clientId);
+        playerDictionary.Remove(clientId);
+        // Destroy old playercard
+        Destroy(oldCard);
+
+        PositionPlayerCards();
+    }
+
+    public void ReadyUp()
+    {
+        BroadcastPlayerReadyUpServerRpc(localClientId);
+    }
+
+    [ServerRpc(RequireOwnership=false)]
+    private void BroadcastPlayerReadyUpServerRpc(ulong clientId)
+    {
+        serverReadyUpDictionary[clientId] = !serverReadyUpDictionary[clientId];
+        CheckIfPlayersReady();
+    }
+
+    private void CheckIfPlayersReady()
+    {
+        foreach (var kvp in serverReadyUpDictionary)
+        {
+            if (!kvp.Value)
+            {
+                TryCancelReadyUp();
+                return;
+            }
+        }
+        canMoveToLobby = true;
+        StartGame();
+    }
+    bool canMoveToLobby = false;
+    private void TryCancelReadyUp()
+    {
+        canMoveToLobby = false;
+    }
+
+    private void StartGame()
+    {
+        StartCoroutine(StartGameAfterTime(1.0f));
+    }
+
+    IEnumerator StartGameAfterTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        if (canMoveToLobby)
+            NetworkManager.Singleton.SceneManager.LoadScene("Level 1", LoadSceneMode.Single);
     }
 }
