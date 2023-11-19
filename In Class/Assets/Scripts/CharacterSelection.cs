@@ -10,7 +10,7 @@ public class CharacterSelection : MonoBehaviour
     public void UpdateCharacter()
     {
         Player player = Player.Instance;
-        playerSprite.sprite = player.GetCharacerSprite();
-        accessorySprite.sprite = player.GetAccessorySprite();
+        playerSprite.sprite = player.CharacterSprite;
+        accessorySprite.sprite = player.AccessorySprite;
     }
 }

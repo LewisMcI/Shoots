@@ -13,6 +13,12 @@ MonoBehaviour:
   m_Name: ListOfAudios
   m_EditorClassIdentifier: 
   audioClip:
+  - {fileID: 8300000, guid: 50caea9500652884c8cfccf99cf857b9, type: 3}
+  - {fileID: 8300000, guid: 4206cdcba1e5ee34385ab417015c015e, type: 3}
+  - {fileID: 8300000, guid: 6a5a409ee7a571e479f62f2be6feebef, type: 3}
   - {fileID: 8300000, guid: 0975fa159cd74c049b3cb3f828f83f24, type: 3}
   audioName:
+  - ReadyUp
+  - StartGame
+  - ButtonClick
   - Boom

@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class JsonSerializer : MonoBehaviour
 {
+    public static PlayerData DeserializePlayerData(string jsonData)
+    {
+        return JsonUtility.FromJson<PlayerData>(jsonData);
+    }
+    public static string SerializePlayerData(PlayerData playerData)
+    {
+        return JsonUtility.ToJson(playerData);
+    }
     public static string SerializeJsonArray(string[] jsonArray)
     {
         return JsonUtility.ToJson(new JsonArrayWrapper { jsons = jsonArray });
