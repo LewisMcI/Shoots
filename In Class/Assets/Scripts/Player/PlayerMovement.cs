@@ -6,13 +6,9 @@ using UnityEngine;
 public class PlayerMovement : NetworkBehaviour
 {
     public float speed = 5f;
-    [SerializeField] private Transform spawnObjectTransform;
-    Transform spawnedObjectTransform;
 
     [SerializeField]
     private Animator movementAnimator;
-    private NetworkVariable<int> theScoreForEachPlayer =
-    new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     bool isGrounded = false;
 
@@ -21,10 +17,6 @@ public class PlayerMovement : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            createBulletShotFromClientServerRpc(transform.position.x, transform.position.y, transform.position.z, transform.rotation);
-        }
         movementAnimator.SetBool("isMove", false);
 
         if (Input.GetKey(KeyCode.D))
@@ -57,12 +49,6 @@ public class PlayerMovement : NetworkBehaviour
             movementAnimator.SetBool("isCrouch", false);
 
     }
-    [ServerRpc]
-    private void createBulletShotFromClientServerRpc(float positionx, float positiony, float positionz, Quaternion vector3rotation)
-    {
-        spawnedObjectTransform = Instantiate(spawnObjectTransform, new Vector3(positionx, positiony, positionz), vector3rotation);
-        spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
-    }
 
     void OnCollisionEnter2D(Collision2D target)
     {
@@ -71,14 +57,8 @@ public class PlayerMovement : NetworkBehaviour
             movementAnimator.SetBool("isJump", false);
             isGrounded = true;
         }
-
-        if (target.gameObject.tag.Equals("Mushrooms") == true)
-        {
-            if (!IsOwner) return;
-            theScoreForEachPlayer.Value = theScoreForEachPlayer.Value + 1;
-            Destroy(target.gameObject);
-        }
     }
+
     void OnCollisionExit2D(Collision2D target)
     {
         if (target.gameObject.layer.Equals(LayerMask.NameToLayer("Grounds")) == true)

@@ -88,7 +88,13 @@ public class LobbyManager : NetworkBehaviour
             serverReadyDictionary.Add(clientId, false);
         // Flip Player Status
         else
+        {
             serverReadyDictionary[clientId] = !serverReadyDictionary[clientId];
+            if (serverReadyDictionary[clientId])
+                Debug.Log("Player: " + clientId + " is ready");
+            else
+                Debug.Log("Player: " + clientId + " is not ready");
+        }
 
         if (CheckIfPlayersReady())
             StartCoroutine(TryStartGameAfterTime(startTime));

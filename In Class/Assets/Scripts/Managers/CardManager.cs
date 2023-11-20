@@ -1,18 +1,37 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
-public class CardManager : MonoBehaviour
+public class CardManager : NetworkBehaviour
 {
     public CardDataObject cardList;
     public GameObject cardPrefab;
+
+    public GameObject playerPrefab;
 
     private void Awake()
     {
         // Read in avaiable cards
         if (!cardList)
             throw new System.Exception("List of Cards not found.");
+        if (IsOwner)
+            SpawnPlayers();
+    }
+
+    void SpawnPlayers()
+    {
+        Debug.Log("Spawning Player");
+        SpawnPlayerServerRpc();
+    }
+
+    [ServerRpc]
+    void SpawnPlayerServerRpc()
+    {
+        Debug.Log("Server: Trying spawn player");
+        GameObject player = NetworkManager.Instantiate(playerPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+        player.GetComponent<NetworkObject>().Spawn(true);
     }
 
     public void ChooseCard(int index)

@@ -994,7 +994,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 897337072}
         m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
         m_MethodName: ReadyUp
         m_Mode: 1
