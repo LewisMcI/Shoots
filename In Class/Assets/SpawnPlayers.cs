@@ -6,13 +6,18 @@ using UnityEngine;
 public class SpawnPlayers : NetworkBehaviour
 {
     public GameObject playerPrefab;
-    private void Awake()
+    private void Start()
     {
         if (IsServer)
         {
-            Debug.Log("Is Server");
-            GameObject player = Instantiate(playerPrefab, transform.position, Quaternion.identity);
-            player.GetComponent<NetworkObject>().Spawn(true);
+            int playerCount = PlayerManager.instance.GetPlayerCount();
+            for (int i = 0; i < playerCount; i++)
+            {
+                ulong clientId = PlayerManager.instance.GetPlayerId(i);
+
+                GameObject player = Instantiate(playerPrefab, transform.position, Quaternion.identity);
+                player.GetComponent<NetworkObject>().SpawnWithOwnership(clientId, true);
+            }
         }
     }
 }

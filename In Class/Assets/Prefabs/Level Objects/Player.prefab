@@ -196,7 +196,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  spawnObjectTransform: {fileID: 6791022407936720624, guid: 5ccc03bad58aba24791d14b741f36724, type: 3}
   movementAnimator: {fileID: 8245859185273457592}
 --- !u!95 &8245859185273457592
 Animator:
@@ -261,5 +260,5 @@ MonoBehaviour:
   UseQuaternionCompression: 0
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
-  Interpolate: 1
-  SlerpPosition: 0
+  Interpolate: 0
+  SlerpPosition: 1

@@ -97,7 +97,7 @@ public class LobbyManager : NetworkBehaviour
         }
 
         if (CheckIfPlayersReady())
-            StartCoroutine(TryStartGameAfterTime(startTime));
+            NetworkManager.Singleton.SceneManager.LoadScene("Level 1", LoadSceneMode.Single);
     }
 
     [ServerRpc(RequireOwnership=false)]
@@ -105,7 +105,7 @@ public class LobbyManager : NetworkBehaviour
     {
         serverReadyDictionary.Remove(clientId);
         if (CheckIfPlayersReady())
-            StartCoroutine(TryStartGameAfterTime(startTime));
+            NetworkManager.Singleton.SceneManager.LoadScene("Level 1", LoadSceneMode.Single);
     }
 
     void AddPlayerCard(ulong clientId, PlayerData playerData)
