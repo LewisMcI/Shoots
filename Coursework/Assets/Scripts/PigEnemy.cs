@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PigEnemy : MonoBehaviour
 {
@@ -86,6 +85,7 @@ public class PigEnemy : MonoBehaviour
             {
                 GetComponent<Animator>().SetTrigger("Attack");
                 Debug.Log("Attack");
+                // TODO: Damage Player
                 complete = true;
             }
             yield return new WaitForFixedUpdate();
