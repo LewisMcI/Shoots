@@ -13,8 +13,12 @@ public class AudioManager : NetworkBehaviour
         if (instance == null)
             instance = this;
         else
-            Destroy(gameObject);
-        DontDestroyOnLoad(gameObject);
+        {
+            Destroy(instance);
+
+            instance = this;
+        }
+            DontDestroyOnLoad(gameObject);
     }
     public void PlaySound(string soundName)
     {

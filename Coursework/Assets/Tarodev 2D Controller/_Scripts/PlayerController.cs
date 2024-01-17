@@ -39,6 +39,10 @@ namespace TarodevController
 
             _cachedQueryStartInColliders = Physics2D.queriesStartInColliders;
         }
+        private void Start()
+        {
+            PlayerManager.instance.clientPlayerControllerDictionary.Add(GetComponent<NetworkObject>().OwnerClientId, gameObject);
+        }
 
         private void Update()
         {

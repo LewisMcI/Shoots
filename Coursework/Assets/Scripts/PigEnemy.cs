@@ -91,6 +91,8 @@ public class PigEnemy : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
+        AudioManager.instance.PlaySoundToAll("Hit");
+
         Debug.Log("Attack Finished");
         nextChargeTime = Time.time + chargeCooldown;
         charging = false;

@@ -17,8 +17,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4206cdcba1e5ee34385ab417015c015e, type: 3}
   - {fileID: 8300000, guid: 6a5a409ee7a571e479f62f2be6feebef, type: 3}
   - {fileID: 8300000, guid: 0975fa159cd74c049b3cb3f828f83f24, type: 3}
+  - {fileID: 8300000, guid: df9b345e7cfa8d1499dacd54d7dc9217, type: 3}
+  - {fileID: 8300000, guid: d23e18dfa5faede4caa6296397aebbcc, type: 3}
   audioName:
   - ReadyUp
   - StartGame
   - ButtonClick
   - Boom
+  - Hit
+  - Shoot

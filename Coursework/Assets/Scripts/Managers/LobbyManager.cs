@@ -27,6 +27,18 @@ public class LobbyManager : NetworkBehaviour
         if (!spriteLookup)
             throw new Exception("Could not find Sprite Lookup Table");
     }
+    private void Start()
+    {
+        SceneManager.activeSceneChanged += OnSceneChange;
+    }
+    private void OnSceneChange(Scene arg0, Scene arg1)
+    {
+        PlayerManager.instance.OnPlayerAdded -= PlayerJoined;
+        PlayerManager.instance.OnPlayerRemoved -= PlayerDisconnected;
+        PlayerManager.instance.OnHostRemoved -= HostDisconnected;
+
+    }
+
     public enum ButtonType
     {
         Host,
@@ -182,7 +194,7 @@ public class LobbyManager : NetworkBehaviour
     {
         FlipReadyStatusServerRpc(NetworkManager.Singleton.LocalClientId);
     }
-
+    
     bool canMoveToLobby = false;
     private bool CheckIfPlayersReady()
     {
@@ -209,13 +221,13 @@ public class LobbyManager : NetworkBehaviour
         // Create Default Player Card
         GameObject playerCard = Instantiate(playerCardPrefab);
         // Set Player Name
-        playerCard.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = newPlayerData.playerName;
+        playerCard.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = newPlayerData.name;
 
         // Get Sprites
-        Sprite characterSprite = spriteLookup.GetCharacterSprite(newPlayerData.characterSpriteIndex);
+/*        Sprite characterSprite = spriteLookup.GetCharacterSprite(newPlayerData.characterSpriteIndex);
         Sprite accessorySprite = spriteLookup.GetAccessoriesSprite(newPlayerData.accessorySpriteIndex);
         playerCard.transform.GetChild(1).GetChild(0).GetComponent<SpriteRenderer>().sprite = characterSprite;
-        playerCard.transform.GetChild(1).GetChild(1).GetComponent<SpriteRenderer>().sprite = accessorySprite;
+        playerCard.transform.GetChild(1).GetChild(1).GetComponent<SpriteRenderer>().sprite = accessorySprite;*/
 
         return playerCard;
     }

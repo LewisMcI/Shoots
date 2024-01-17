@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public delegate void PlayerAddedEventHandler(ulong clientId);
@@ -20,6 +21,9 @@ public class PlayerManager : NetworkBehaviour
     // Local Dictionary associating ClientID's and Player Data
     Dictionary<ulong, PlayerData> clientPlayerDictionary = new Dictionary<ulong, PlayerData>();
 
+    // Local Dictionary associating ClientID's and Player Controllers
+    public Dictionary<ulong, GameObject> clientPlayerControllerDictionary = new Dictionary<ulong, GameObject>();
+
     // Server Dictionary associating ClientID's and Serialized Player Data
     Dictionary<ulong, string> serverPlayerDictionary = new Dictionary<ulong, string>();
 
@@ -36,6 +40,7 @@ public class PlayerManager : NetworkBehaviour
         }
         throw new Exception("Tried get PlayerID that does not exist");
     }
+
     public PlayerData GetPlayerData(ulong clientId)
     {
         return clientPlayerDictionary[clientId];
@@ -45,7 +50,11 @@ public class PlayerManager : NetworkBehaviour
         if (instance == null)
             instance = this;
         else
-            Destroy(gameObject);
+        {
+            Destroy(instance);
+
+            instance = this;
+        }
 
         NetworkManager.Singleton.OnClientConnectedCallback += OnPlayerJoined;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnPlayerLeft;
@@ -116,7 +125,7 @@ public class PlayerManager : NetworkBehaviour
     {
         clientPlayerDictionary.Add(clientId, playerData);
 
-        Debug.Log("Local: Player " + clientId + ", with Name: " + playerData.playerName + " has been Added");
+        Debug.Log("Local: Player " + clientId + ", with Name: " + playerData.name + " has been Added");
 
         OnPlayerAdded?.Invoke(clientId);
     }
@@ -172,6 +181,60 @@ public class PlayerManager : NetworkBehaviour
 
 
         OnHostRemoved?.Invoke();
+    }
+    #endregion
+    #region maxHealth
+    // Only call when SERVER wants to update player max health
+    public void UpdatePlayerMaxHealth(ulong clientId, float newHealth)
+    {
+        UpdatePlayerMaxHealthServerRpc(clientId, newHealth);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void UpdatePlayerMaxHealthServerRpc(ulong clientId, float newHealth)
+    {
+        UpdatePlayerMaxHealthClientRpc(clientId, newHealth);
+    }
+
+    [ClientRpc]
+    private void UpdatePlayerMaxHealthClientRpc(ulong clientId, float newHealth)
+    {
+        PlayerData playerData = clientPlayerDictionary[clientId];
+        playerData.maxHealth = newHealth;
+        clientPlayerDictionary[clientId] = playerData;
+    }
+    #endregion
+    #region currHealth
+    // Only call when SERVER wants to deal player damage
+    public void PlayerDealDamage(ulong clientId, float damage)
+    {
+        PlayerDealDamageServerRpc(clientId, damage);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void PlayerDealDamageServerRpc(ulong clientId, float damage)
+    {
+        PlayerDealDamageClientRpc(clientId, damage);
+
+        PlayerData playerData = clientPlayerDictionary[clientId];
+        playerData.currHealth = playerData.currHealth - damage;
+
+        if (playerData.currHealth <= 0) { GameManager.instance.GameOverServerRPC(); }
+    }
+
+    [ClientRpc]
+    private void PlayerDealDamageClientRpc(ulong clientId, float damage)
+    {
+        PlayerData playerData = clientPlayerDictionary[clientId];
+        playerData.currHealth = playerData.currHealth - damage;
+        clientPlayerDictionary[clientId] = playerData;
+        Debug.Log("New HP for Client: " + clientId + " = " + playerData.currHealth);
+
+        Vector3 scale;
+        if (playerData.currHealth <= 0) { scale = new Vector3(0.0f, 1.0f, 1.0f); }
+        else { scale = new Vector3(playerData.currHealth / playerData.maxHealth, 1.0f, 1.0f); }
+        Transform playerHealthBar = clientPlayerControllerDictionary[clientId].transform.GetChild(1).GetChild(0);
+        playerHealthBar.localScale = scale;
     }
     #endregion
 }

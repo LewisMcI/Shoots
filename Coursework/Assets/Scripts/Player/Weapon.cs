@@ -37,6 +37,7 @@ public class Weapon : NetworkBehaviour
         GameObject bullet = Instantiate(projectile, transform.position + new Vector3(0.0f, 0.5f, 0.0f), Quaternion.identity);
         NetworkObject netObj = bullet.GetComponent<NetworkObject>();
         netObj.SpawnAsPlayerObject(clientId);
+        AudioManager.instance.PlaySoundToAll("Shoot");
     }
 
     [ClientRpc]

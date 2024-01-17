@@ -7,9 +7,9 @@ using Unity.Netcode;
 using UnityEngine;
 public struct PlayerData
 {
-    public string playerName;
-    public int characterSpriteIndex;
-    public int accessorySpriteIndex;
+    public string name;
+    public float maxHealth;
+    public float currHealth;
 }
 
 public class Player : NetworkBehaviour
@@ -18,9 +18,9 @@ public class Player : NetworkBehaviour
 
     PlayerData playerData = new PlayerData
     {
-        playerName = "",
-        characterSpriteIndex = 0,
-        accessorySpriteIndex = 0
+        name = "",
+        maxHealth = 100,
+        currHealth = 100
     };
     
     public TMP_InputField playerInputField;
@@ -29,9 +29,7 @@ public class Player : NetworkBehaviour
 
     // Getters
     public PlayerData PlayerData { get => playerData; }
-    public string PlayerName { get => playerData.playerName; }
-    public Sprite CharacterSprite { get => spriteLookup.GetCharacterSprite(playerData.characterSpriteIndex); }
-    public Sprite AccessorySprite { get => spriteLookup.GetAccessoriesSprite(playerData.accessorySpriteIndex); }
+    public string PlayerName { get => playerData.name; }
 
     private void Awake()
     {
@@ -53,17 +51,15 @@ public class Player : NetworkBehaviour
     public void UpdateName(string name)
     {
         // Regex for removing double spaces
-        playerData.playerName = Regex.Replace(name.Trim(), @"\s+", " ");
-    }
-    public void UpdateCharacterSprite(int spriteIndex)
-    {
-        Debug.Log("Update Character Sprite to Sprite: " + spriteIndex);
-        playerData.characterSpriteIndex = spriteIndex;
-    }
-    public void UpdateAccessoriesSprite(int spriteIndex)
-    {
-        Debug.Log("Update Accessory Sprite to Sprite: " + spriteIndex);
-        playerData.accessorySpriteIndex = spriteIndex;
+        playerData.name = Regex.Replace(name.Trim(), @"\s+", " ");
     }
 
+    public void UpdateMaxHealth(float maxHealth)
+    {
+        playerData.maxHealth = maxHealth;
+    }
+    public void UpdateCurrHealth(float currHealth)
+    {
+        playerData.currHealth = currHealth;
+    }
 }

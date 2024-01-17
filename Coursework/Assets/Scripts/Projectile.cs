@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Projectile : NetworkBehaviour
 {
+    float damage = 10.0f;
     private void Awake()
     {
         if (IsServer)
@@ -17,12 +18,15 @@ public class Projectile : NetworkBehaviour
     {
         if (!IsServer)
             return;
-            if (collision.tag == "Player")
+        if (collision.tag == "Player")
         {
             ulong clientId = GetComponent<NetworkObject>().OwnerClientId;
             ulong otherClientId = collision.GetComponent<NetworkObject>().OwnerClientId;
             if (clientId == otherClientId)
                 return;
+
+
+            PlayerManager.instance.PlayerDealDamage(otherClientId, damage);
         }
         Debug.Log("Hit " + collision.name);
         Destroy(gameObject);
