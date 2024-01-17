@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1544650614272011793}
   - component: {fileID: 1544650614272011794}
   - component: {fileID: 1364970205667410140}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Player Controller
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -156,7 +156,7 @@ GameObject:
   - component: {fileID: 2969068311587289282}
   - component: {fileID: 2969068311587289284}
   - component: {fileID: 2969068311587289283}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: DashRing Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5042,7 +5042,7 @@ GameObject:
   - component: {fileID: 2969068311631949166}
   - component: {fileID: 2969068311631949152}
   - component: {fileID: 2969068311631949167}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Move Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9868,7 +9868,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2969068311871471201}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9907,7 +9907,7 @@ GameObject:
   - component: {fileID: 2969068311962969430}
   - component: {fileID: 2969068311962969768}
   - component: {fileID: 2969068311962969431}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10064,7 +10064,7 @@ GameObject:
   - component: {fileID: 2969068312368229176}
   - component: {fileID: 2969068312368229178}
   - component: {fileID: 2969068312368229177}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Land Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14950,7 +14950,7 @@ GameObject:
   - component: {fileID: 2969068312440364620}
   - component: {fileID: 2969068312440364622}
   - component: {fileID: 2969068312440364621}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Dash Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19778,7 +19778,7 @@ GameObject:
   - component: {fileID: 2969068312619346369}
   - component: {fileID: 2969068312619346371}
   - component: {fileID: 2969068312619346370}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Jump Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24665,7 +24665,7 @@ GameObject:
   - component: {fileID: 2969068312669941332}
   - component: {fileID: 2969068312669941334}
   - component: {fileID: 2969068312669941333}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Launch Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29549,7 +29549,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2969068312704584583}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Dash Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29584,7 +29584,7 @@ GameObject:
   - component: {fileID: 2969068313154050967}
   - component: {fileID: 2969068313154050966}
   - component: {fileID: 233626831477069057}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29710,7 +29710,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2969068313184073012}
   - component: {fileID: 2969068313184073013}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: TrailRenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29856,7 +29856,7 @@ GameObject:
   - component: {fileID: 2969068313322230366}
   - component: {fileID: 2969068313322230352}
   - component: {fileID: 2969068313322230367}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Double Jump Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
