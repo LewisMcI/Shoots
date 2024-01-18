@@ -5,20 +5,47 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
+using static Leaderboards;
 
 public class Leaderboards : MonoBehaviour
 {
+    [System.Serializable]
+    public class PlayerWins
+    {
+        public string player_name;
+        public int wins;
+    }
 
+    [System.Serializable]
+    public class PlayerWinsList
+    {
+        public PlayerWins[] players;
+    }
+    List<string> playerNames = new List<string>();
     private void Awake()
     {
-        StartCoroutine(GetData());
+        DontDestroyOnLoad(gameObject);
+
+        PlayerManager.instance.OnPlayerAdded += AddPlayer;
+        PlayerManager.instance.OnPlayerRemoved += RemovePlayer;
+    }
+
+    private void AddPlayer(ulong clientId)
+    {
+        playerNames.Add(PlayerManager.instance.GetPlayerData(clientId).name);
+        StartCoroutine(GetData(playerNames.ToArray()));
+    }
+
+    private void RemovePlayer(ulong clientId)
+    {
+        playerNames.Remove(PlayerManager.instance.GetPlayerData(clientId).name);
+        StartCoroutine(GetData(playerNames.ToArray()));
     }
     [ServerRpc]
     public void AddWins(string name, int wins)
     {
         StartCoroutine(AddWinsToDB(name, wins));
     }
-
     IEnumerator AddWinsToDB(string name, int numOfWins)
     {
         // Prepare the form data
@@ -41,12 +68,11 @@ public class Leaderboards : MonoBehaviour
         }
     }
 
-    string[] theResultString;
+    List<string> theResultString = new List<string>();
     bool getDataSuccess;
 
-    IEnumerator GetData()
+    IEnumerator GetData(string[] playerNames)
     {
-        string[] playerNames = { "Lewis" };
         string playerNamesString = string.Join(",", playerNames);
 
         // Create the URL with the player names as a parameter
@@ -68,6 +94,24 @@ public class Leaderboards : MonoBehaviour
             // Parse the JSON response
             string jsonResponse = www.downloadHandler.text;
             Debug.Log("Response: " + jsonResponse);
+            // Use JsonUtility to parse the JSON array into a PlayerDataList object
+            PlayerWinsList playerDataList = JsonUtility.FromJson<PlayerWinsList>("{\"players\":" + jsonResponse + "}");
+
+            // Access the array of PlayerData objects
+            PlayerWins[] playerDataArray = playerDataList.players;
+            
+            theResultString = new List<string>();
+
+            // Display the parsed data
+            foreach (PlayerWins playerData in playerDataArray)
+            {
+                theResultString.Add("Player " + playerData.player_name + " has " + playerData.wins + " wins.");
+
+                Debug.Log("Player Name: " + playerData.player_name);
+                Debug.Log("Wins: " + playerData.wins);
+            }
+            getDataSuccess = true;
+            Debug.Log("Success");
             // You can then use JSONUtility or other JSON parsing libraries to convert the JSON response into a usable object in Unity
             // Example: YourDataClass data = JsonUtility.FromJson<YourDataClass>(jsonResponse);
         }
@@ -78,8 +122,9 @@ public class Leaderboards : MonoBehaviour
         //show the parsed information to screen
         if (getDataSuccess)
         {
-            for (int i = 0; i < theResultString.Length - 1; i++)
+            for (int i = 0; i < theResultString.Count - 1; i++)
             {
+                Debug.Log("GUI");
                 GUI.Label(new Rect(10, 60 + (15 * i + 1), 300, 20), theResultString[i]);
             }
         }

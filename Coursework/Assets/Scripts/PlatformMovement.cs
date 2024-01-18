@@ -14,7 +14,7 @@ public class PlatformMovement : MonoBehaviour
     }
     void Update()
     {
-        transform.position = initPos + new Vector3((Mathf.PingPong(Time.time * 2, travelDistance) - (travelDistance / 2.0f)), 0.0f, 0.0f);
+        transform.position = initPos + new Vector3(0.0f, (Mathf.PingPong(Time.time * 2, travelDistance) - (travelDistance / 2.0f)), 0.0f);
     }
 /*
     private Transform previousTransform;
