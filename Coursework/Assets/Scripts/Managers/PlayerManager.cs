@@ -214,12 +214,18 @@ public class PlayerManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void PlayerDealDamageServerRpc(ulong clientId, float damage)
     {
-        PlayerDealDamageClientRpc(clientId, damage);
 
         PlayerData playerData = clientPlayerDictionary[clientId];
         playerData.currHealth = playerData.currHealth - damage;
+        Debug.Log(playerData.currHealth);
 
-        if (playerData.currHealth <= 0) { GameManager.instance.KillPlayerServerRPC(clientId); }
+        if (playerData.currHealth <= 0) {
+            GameObject controller = clientPlayerControllerDictionary[clientId];
+            clientPlayerControllerDictionary.Remove(clientId);
+            Destroy(controller); 
+            GameManager.instance.KillPlayerServerRPC(clientId); 
+        }
+        else { PlayerDealDamageClientRpc(clientId, damage); }
     }
 
     [ClientRpc]

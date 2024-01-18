@@ -13,7 +13,7 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField]
     Leaderboards leaderboards;
-    List<ulong> deadPlayers;
+    List<ulong> deadPlayers = new List<ulong>();
     private void Awake()
     {
         if (instance == null)
@@ -31,18 +31,17 @@ public class GameManager : NetworkBehaviour
     public void KillPlayerServerRPC(ulong clientID)
     {
         deadPlayers.Add(clientID);
-
+        Debug.Log("Kill Player");
+        // If 1 left
         if (deadPlayers.Count >= PlayerManager.instance.GetPlayerCount() - 1)
         {
-            for (int i = 0; i < PlayerManager.instance.GetPlayerCount(); i++)
+            // Should only be one
+            foreach (var item in PlayerManager.instance.clientPlayerControllerDictionary)
             {
-                if (PlayerManager.instance.GetPlayerId(i) == deadPlayers[i])
-                {
-                    // PlayerManager.instance.GetPlayerId(i) won
-                }
-
+                ulong winnerClientId = item.Key;
+                Debug.Log("Player " + winnerClientId + " has won!!!");
             }
-            GameOverServerRPC();
+            //GameOverServerRPC();
         }
     }
 

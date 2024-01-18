@@ -16,6 +16,7 @@ public class SpawnPlayers : NetworkBehaviour
                 ulong clientId = PlayerManager.instance.GetPlayerId(i);
 
                 GameObject player = Instantiate(playerPrefab, transform.position, Quaternion.identity);
+                player.name = "Player " + clientId;
                 player.GetComponent<NetworkObject>().SpawnWithOwnership(clientId, true);
             }
         }

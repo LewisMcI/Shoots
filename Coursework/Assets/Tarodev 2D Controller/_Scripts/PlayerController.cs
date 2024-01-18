@@ -41,9 +41,8 @@ namespace TarodevController
         }
         private void Start()
         {
-            PlayerManager.instance.clientPlayerControllerDictionary.Add(GetComponent<NetworkObject>().OwnerClientId, gameObject);
+            PlayerManager.instance.clientPlayerControllerDictionary.Add(OwnerClientId, gameObject);
         }
-
         private void Update()
         {
             if (!IsOwner)
