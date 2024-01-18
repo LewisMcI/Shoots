@@ -8655,6 +8655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec6585461ea56ba49b9a649fb01bc2e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deathScreen: {fileID: 1984574394814193984, guid: c14f71b6715d3554a96ec012112f5362, type: 3}
 --- !u!114 &897337072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17891,7 +17892,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b06ab4d09b8b35459fc69dcbb5fd566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leaderboards: {fileID: 0}
+  leaderboards: {fileID: 897337075}
 --- !u!4 &2143381798
 Transform:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,12 +36,13 @@ public class GameManager : NetworkBehaviour
         // If 1 left
         if (deadPlayers.Count >= PlayerManager.instance.GetPlayerCount() - 1)
         {
-            // Should only be one
-            foreach (var item in PlayerManager.instance.clientPlayerControllerDictionary)
-            {
-                ulong winnerClientId = item.Key;
-                Debug.Log("Player " + winnerClientId + " has won!!!");
-            }
+            KeyValuePair<ulong, GameObject> firstKeyValuePair = PlayerManager.instance.clientPlayerControllerDictionary.First();
+
+            ulong winnerClientId = firstKeyValuePair.Key;
+            Debug.Log("Player " + winnerClientId + " has won!!!");
+            leaderboards.AddWins(PlayerManager.instance.GetPlayerData(winnerClientId).name, 1);
+            PlayerManager.instance.ResetControllers();
+            deadPlayers = new List<ulong>();
             //GameOverServerRPC();
         }
     }

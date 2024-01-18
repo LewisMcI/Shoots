@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public delegate void PlayerAddedEventHandler(ulong clientId);
 public delegate void PlayerRemovedEventHandler(ulong clientId);
@@ -61,6 +63,34 @@ public class PlayerManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientStopped += OnHostLeft;
 
         DontDestroyOnLoad(gameObject);
+    }
+
+    public void ResetControllers()
+    {
+        clientPlayerControllerDictionary.Clear();
+        ResetControllerClientRpc();
+        NetworkManager.SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+    }
+
+    [ClientRpc]
+    private void ResetControllerClientRpc()
+    {
+        clientPlayerControllerDictionary.Clear();
+
+        Dictionary<ulong, PlayerData> newDictionary = new Dictionary<ulong, PlayerData>();
+        // Reset Health
+        foreach (var kvp in clientPlayerDictionary)
+        {
+            ulong playerId = kvp.Key;
+            PlayerData playerData = kvp.Value;
+            playerData.currHealth = playerData.maxHealth;
+
+            newDictionary.Add(playerId, playerData); 
+        }
+        clientPlayerDictionary.Clear();
+
+        clientPlayerDictionary = newDictionary;
+
     }
     #region playerJoined
     /* OnPlayerJoined
@@ -223,11 +253,21 @@ public class PlayerManager : NetworkBehaviour
             GameObject controller = clientPlayerControllerDictionary[clientId];
             clientPlayerControllerDictionary.Remove(clientId);
             Destroy(controller); 
-            GameManager.instance.KillPlayerServerRPC(clientId); 
+            GameManager.instance.KillPlayerServerRPC(clientId);
+            TellPlayerDeadClientRpc(clientId);
         }
         else { PlayerDealDamageClientRpc(clientId, damage); }
     }
 
+    [SerializeField] private GameObject deathScreen;
+    [ClientRpc]
+    private void TellPlayerDeadClientRpc(ulong clientId)
+    {
+        if (clientId == NetworkManager.Singleton.LocalClientId)
+        {
+            Instantiate(deathScreen);
+        }
+    }
     [ClientRpc]
     private void PlayerDealDamageClientRpc(ulong clientId, float damage)
     {

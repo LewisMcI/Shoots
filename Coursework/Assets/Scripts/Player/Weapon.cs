@@ -15,7 +15,7 @@ public class Weapon : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetMouseButtonDown(0))
         {
             // Check if can shoot bullet
             ShootBullet();
