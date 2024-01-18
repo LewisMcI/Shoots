@@ -8573,6 +8573,7 @@ GameObject:
   - component: {fileID: 897337071}
   - component: {fileID: 897337074}
   - component: {fileID: 897337073}
+  - component: {fileID: 897337075}
   - component: {fileID: 897337068}
   m_Layer: 0
   m_Name: Managers
@@ -8697,6 +8698,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInputField: {fileID: 1004160740}
+--- !u!114 &897337075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 897337066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53eafd706efeba04c9b6c0a6a38d014c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &898110621
 GameObject:
   m_ObjectHideFlags: 0
@@ -17878,6 +17891,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b06ab4d09b8b35459fc69dcbb5fd566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  leaderboards: {fileID: 0}
 --- !u!4 &2143381798
 Transform:
   m_ObjectHideFlags: 0

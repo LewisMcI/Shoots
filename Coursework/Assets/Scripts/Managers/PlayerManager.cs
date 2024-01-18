@@ -219,7 +219,7 @@ public class PlayerManager : NetworkBehaviour
         PlayerData playerData = clientPlayerDictionary[clientId];
         playerData.currHealth = playerData.currHealth - damage;
 
-        if (playerData.currHealth <= 0) { GameManager.instance.GameOverServerRPC(); }
+        if (playerData.currHealth <= 0) { GameManager.instance.KillPlayerServerRPC(clientId); }
     }
 
     [ClientRpc]

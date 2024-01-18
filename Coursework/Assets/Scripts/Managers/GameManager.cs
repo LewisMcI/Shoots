@@ -10,6 +10,10 @@ public class GameManager : NetworkBehaviour
 {
     // Singleton
     public static GameManager instance;
+
+    [SerializeField]
+    Leaderboards leaderboards;
+    List<ulong> deadPlayers;
     private void Awake()
     {
         if (instance == null)
@@ -21,6 +25,25 @@ public class GameManager : NetworkBehaviour
             instance = this;
         }
         DontDestroyOnLoad(gameObject);
+    }
+
+    [ServerRpc]
+    public void KillPlayerServerRPC(ulong clientID)
+    {
+        deadPlayers.Add(clientID);
+
+        if (deadPlayers.Count >= PlayerManager.instance.GetPlayerCount() - 1)
+        {
+            for (int i = 0; i < PlayerManager.instance.GetPlayerCount(); i++)
+            {
+                if (PlayerManager.instance.GetPlayerId(i) == deadPlayers[i])
+                {
+                    // PlayerManager.instance.GetPlayerId(i) won
+                }
+
+            }
+            GameOverServerRPC();
+        }
     }
 
     [ServerRpc]
