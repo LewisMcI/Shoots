@@ -76,11 +76,6 @@ namespace TarodevController
 
         private void FixedUpdate()
         {
-    /*        if (IsServer && nextTime < Time.time)
-            {
-                nextTime = Time.time + cd;
-                ServerReconcilliation();
-            }*/
             if (!IsOwner)
             {
                 return;
@@ -208,17 +203,6 @@ namespace TarodevController
 
         private void ApplyMovement() => _rb.velocity = _frameVelocity;
 
-        float nextTime = 0;
-        float cd = .5f;
-        void ServerReconcilliation()
-        {
-            UpdateAllClientPositionsClientRPC(transform.position);
-        }
-        [ClientRpc]
-        void UpdateAllClientPositionsClientRPC(Vector3 pos)
-        {
-            transform.position = pos;
-        }
         [ServerRpc]
         private void ApplyMovementServerRpc(float _frameVelocityX, float _frameVelocityY, ulong theIDOftheCharacterThatMoves)
         {

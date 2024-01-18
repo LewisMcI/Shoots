@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 namespace TarodevController
@@ -5,7 +6,7 @@ namespace TarodevController
     /// <summary>
     /// VERY primitive animator example.
     /// </summary>
-    public class PlayerAnimator : MonoBehaviour
+    public class PlayerAnimator : NetworkBehaviour
     {
         [Header("References")] [SerializeField]
         private Animator _anim;
@@ -68,7 +69,24 @@ namespace TarodevController
 
         private void HandleSpriteFlip()
         {
-            if (_player.FrameInput.x != 0) _sprite.flipX = _player.FrameInput.x < 0;
+            if (_player.FrameInput.x != 0)
+            {
+                _sprite.flipX = _player.FrameInput.x < 0;
+
+                HandleSpriteFlipServerRpc(_player.FrameInput.x < 0);
+            }
+        }
+        [ServerRpc(RequireOwnership=false)]
+        void HandleSpriteFlipServerRpc(bool dir)
+        {
+            _sprite.flipX = dir;
+            HandleSpriteFlipClientRpc(dir);
+        }
+
+        [ClientRpc]
+        void HandleSpriteFlipClientRpc(bool dir)
+        {
+            _sprite.flipX = dir;    
         }
 
         private void HandleIdleSpeed()
@@ -76,12 +94,42 @@ namespace TarodevController
             var inputStrength = Mathf.Abs(_player.FrameInput.x);
             _anim.SetFloat(IdleSpeedKey, Mathf.Lerp(1, _maxIdleSpeed, inputStrength));
             _moveParticles.transform.localScale = Vector3.MoveTowards(_moveParticles.transform.localScale, Vector3.one * inputStrength, 2 * Time.deltaTime);
+            HandleIdleSpeedServerRPC(inputStrength);
         }
+        [ServerRpc(RequireOwnership=false)]
+        private void HandleIdleSpeedServerRPC(float inputStrength)
+        {
+            _anim.SetFloat(IdleSpeedKey, Mathf.Lerp(1, _maxIdleSpeed, inputStrength));
+            _moveParticles.transform.localScale = Vector3.MoveTowards(_moveParticles.transform.localScale, Vector3.one * inputStrength, 2 * Time.deltaTime);
+            HandleIdleSpeedClientRPC(inputStrength);
+        }
+
+        [ClientRpc]
+        private void HandleIdleSpeedClientRPC(float inputStrength)
+        {
+            _anim.SetFloat(IdleSpeedKey, Mathf.Lerp(1, _maxIdleSpeed, inputStrength));
+            _moveParticles.transform.localScale = Vector3.MoveTowards(_moveParticles.transform.localScale, Vector3.one * inputStrength, 2 * Time.deltaTime);
+        }
+
 
         private void HandleCharacterTilt()
         {
             var runningTilt = _grounded ? Quaternion.Euler(0, 0, _maxTilt * _player.FrameInput.x) : Quaternion.identity;
             _anim.transform.up = Vector3.RotateTowards(_anim.transform.up, runningTilt * Vector2.up, _tiltSpeed * Time.deltaTime, 0f);
+
+            HandleCharacterTiltServerRPC(_anim.transform.up);
+        }
+
+        [ServerRpc(RequireOwnership=false)]
+        private void HandleCharacterTiltServerRPC(Vector3 up)
+        {
+            _anim.transform.up = up;
+            HandleCharacterTiltClientRPC(up);
+        }
+        [ClientRpc]
+        private void HandleCharacterTiltClientRPC(Vector3 up)
+        {
+            _anim.transform.up = up;
         }
 
         private void OnJumped()
