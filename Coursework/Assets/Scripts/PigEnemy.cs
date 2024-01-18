@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class PigEnemy : MonoBehaviour
@@ -33,7 +35,7 @@ public class PigEnemy : MonoBehaviour
 
         // Find Direction to closest
         Vector2 direction = closestPlayer.transform.position - transform.position;
-
+        
         // Check the sign of the x component of the direction vector
         if (direction.x > 0)
         {
@@ -84,8 +86,12 @@ public class PigEnemy : MonoBehaviour
             if (closestPlayer)
             {
                 GetComponent<Animator>().SetTrigger("Attack");
-                Debug.Log("Attack");
-                // TODO: Damage Player
+
+                if (Vector3.Distance(closestPlayer.transform.position, transform.position) < 1.0f)
+                {
+                    // Attack
+                    Debug.Log("Attack");
+                }
                 complete = true;
             }
             yield return new WaitForFixedUpdate();

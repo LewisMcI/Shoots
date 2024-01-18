@@ -26,8 +26,10 @@ public class Leaderboards : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
 
-        PlayerManager.instance.OnPlayerAdded += AddPlayer;
-        PlayerManager.instance.OnPlayerRemoved += RemovePlayer;
+        //PlayerManager.instance.OnPlayerAdded += AddPlayer;
+        //PlayerManager.instance.OnPlayerRemoved += RemovePlayer;
+
+        //StartCoroutine(GetData(new string[] { "Lewis" }));
     }
 
     private void AddPlayer(ulong clientId)
@@ -71,9 +73,9 @@ public class Leaderboards : MonoBehaviour
     List<string> theResultString = new List<string>();
     bool getDataSuccess;
 
-    IEnumerator GetData(string[] playerNames)
+    IEnumerator GetData(string[] playerArray)
     {
-        string playerNamesString = string.Join(",", playerNames);
+        string playerNamesString = string.Join(",", playerArray);
 
         // Create the URL with the player names as a parameter
         string urlWithParameters = $"{"http://localhost/unityMultiplayerLeaderboard/leaderboardgetwins.php"}?player_names={playerNamesString}";
@@ -122,7 +124,7 @@ public class Leaderboards : MonoBehaviour
         //show the parsed information to screen
         if (getDataSuccess)
         {
-            for (int i = 0; i < theResultString.Count - 1; i++)
+            for (int i = 0; i < theResultString.Count; i++)
             {
                 Debug.Log("GUI");
                 GUI.Label(new Rect(10, 60 + (15 * i + 1), 300, 20), theResultString[i]);
