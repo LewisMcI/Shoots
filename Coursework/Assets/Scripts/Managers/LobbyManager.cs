@@ -5,9 +5,15 @@ using System.Linq;
 using TMPro;
 using Unity.Netcode;
 using Unity.Networking.Transport;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
+using Unity.Services.Relay.Models;
+using Unity.Services.Relay;
+using Unity.Netcode.Transports.UTP;
 
 public class LobbyManager : NetworkBehaviour 
 {
@@ -21,11 +27,19 @@ public class LobbyManager : NetworkBehaviour
     Dictionary<ulong, GameObject> clientPlayerCards = new Dictionary<ulong, GameObject>();
 
     bool hosting = false;
-    private void Awake()
+    private async void Awake()
     {
         spriteLookup = GetComponent<SpriteLookup>();
         if (!spriteLookup)
             throw new Exception("Could not find Sprite Lookup Table");
+
+        await Authenticate();
+    }
+
+    private static async Task Authenticate()
+    {
+        await UnityServices.InitializeAsync();
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
     }
     private void Start()
     {
@@ -61,16 +75,13 @@ public class LobbyManager : NetworkBehaviour
         {
             case ButtonType.Host:
                 if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
-                {
-                    NetworkManager.Singleton.StartHost();
-                    hosting = true;
-                }
+                    HostLobby();
                 else
                     throw new Exception("Trying to Host new lobby while in lobby.");
                 break;
             case ButtonType.Client:
                 if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
-                    NetworkManager.Singleton.StartClient();
+                    JoinLobby();
                 else
                     throw new Exception("Trying to Join new lobby while in lobby.");
                 break;
@@ -91,6 +102,29 @@ public class LobbyManager : NetworkBehaviour
                 break;
         }
 }
+
+    public UnityTransport transport;
+    public TMP_Text lobbyCodeText;
+    public async void HostLobby()
+    {
+        Allocation a = await RelayService.Instance.CreateAllocationAsync(4);
+        string joinCode = await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
+        lobbyCodeText.text = joinCode;
+
+        transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
+
+        NetworkManager.Singleton.StartHost();
+        hosting = true;
+    }
+    public TMP_InputField joinLobbyCode;
+    public async void JoinLobby()
+    {
+        JoinAllocation a = await RelayService.Instance.JoinAllocationAsync(joinLobbyCode.text);
+
+        transport.SetClientRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData, a.HostConnectionData);
+
+        NetworkManager.Singleton.StartClient();
+    }
 
     void PlayerJoined(ulong clientId)
     {
