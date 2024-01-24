@@ -87,10 +87,11 @@ public class PigEnemy : MonoBehaviour
             {
                 GetComponent<Animator>().SetTrigger("Attack");
 
-                if (Vector3.Distance(closestPlayer.transform.position, transform.position) < 1.0f)
+                if (Vector3.Distance(closestPlayer.transform.position, transform.position) < attackDistance*2)
                 {
+                    Debug.Log("Hit");
                     // Attack
-                    Debug.Log("Attack");
+                    PlayerManager.instance.PlayerDealDamage(closestPlayer.GetComponent<NetworkObject>().OwnerClientId, 10.0f);
                 }
                 complete = true;
             }
