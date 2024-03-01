@@ -9,13 +9,18 @@ public class Weapon : NetworkBehaviour
 {
     [SerializeField]
     GameObject projectile;
+
+    [SerializeField]
+    float shootCooldown = 0.5f;
+    float nextShootTime = 0;
+    private bool CanShoot() { if (Time.time > nextShootTime) { nextShootTime = Time.time + shootCooldown; return true; } else return false; }
     // Update is called once per frame
     void Update()
     {
         if (!IsOwner)
             return;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && CanShoot())
         {
             Vector3 inputPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             // Check if can shoot bullet

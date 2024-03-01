@@ -30,6 +30,7 @@ public class PlayerManager : NetworkBehaviour
     Dictionary<ulong, string> serverPlayerDictionary = new Dictionary<ulong, string>();
 
     // Values
+    public GameObject GetPlayerController(ulong clientId) { return clientPlayerControllerDictionary[clientId]; }
     public int GetPlayerCount() { return clientPlayerDictionary.Count; }
     public ulong GetPlayerId(int index)
     {

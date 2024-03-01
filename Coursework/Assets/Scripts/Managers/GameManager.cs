@@ -33,6 +33,7 @@ public class GameManager : NetworkBehaviour
     {
         deadPlayers.Add(clientID);
         Debug.Log("Kill Player");
+
         // If 1 left
         if (deadPlayers.Count >= PlayerManager.instance.GetPlayerCount() - 1)
         {
@@ -43,7 +44,6 @@ public class GameManager : NetworkBehaviour
             leaderboards.AddWins(PlayerManager.instance.GetPlayerData(winnerClientId).name, 1);
             PlayerManager.instance.ResetControllers();
             deadPlayers = new List<ulong>();
-            //GameOverServerRPC();
         }
     }
 }
